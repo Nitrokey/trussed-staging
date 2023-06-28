@@ -21,6 +21,9 @@ pub mod streaming;
 #[cfg(feature = "manage")]
 pub mod manage;
 
+#[cfg(feature = "hmacsha256p256")]
+pub mod hmacsha256p256;
+
 #[derive(Clone, Debug, Default)]
 #[non_exhaustive]
 pub struct StagingBackend {
