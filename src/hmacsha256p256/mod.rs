@@ -55,8 +55,6 @@ mod request {
 
     #[derive(Debug, Deserialize, Serialize)]
     pub struct InjectAnyKey {
-        pub mechanism: Mechanism,
-        pub key: KeyId,
         pub location: Location,
         pub kind: Kind,
         pub raw_key: SerializedKey,
@@ -228,15 +226,11 @@ pub trait HmacSha256P256Client: ExtensionClient<HmacSha256P256Extension> {
 
     fn inject_any_key(
         &mut self,
-        mechanism: Mechanism,
-        key: KeyId,
+        raw_key: SerializedKey,
         location: Location,
         kind: Kind,
-        raw_key: SerializedKey,
     ) -> HmacSha256P256Result<'_, reply::InjectAnyKey, Self> {
         self.extension(request::InjectAnyKey {
-            mechanism,
-            key,
             location,
             kind,
             raw_key,
