@@ -16,6 +16,9 @@ use crate::streaming::ChunkedExtension;
 #[cfg(feature = "manage")]
 use trussed::types::{Location, Path};
 
+#[cfg(feature = "hmacsha256p256")]
+use crate::hmacsha256p256::HmacSha256P256Extension;
+
 #[derive(Default, Debug)]
 pub struct Dispatcher {
     backend: StagingBackend,
@@ -34,6 +37,14 @@ pub enum ExtensionIds {
     Chunked,
     #[cfg(feature = "manage")]
     Manage,
+    #[cfg(feature = "hmacsha256p256")]
+    HmacShaP256,
+}
+
+#[cfg(feature = "hmacsha256p256")]
+impl ExtensionId<HmacSha256P256Extension> for Dispatcher {
+    type Id = ExtensionIds;
+    const ID: ExtensionIds = ExtensionIds::HmacShaP256;
 }
 
 #[cfg(feature = "wrap-key-to-file")]
@@ -63,6 +74,8 @@ impl From<ExtensionIds> for u8 {
             ExtensionIds::Chunked => 1,
             #[cfg(feature = "manage")]
             ExtensionIds::Manage => 2,
+            #[cfg(feature = "hmacsha256p256")]
+            ExtensionIds::HmacShaP256 => 2,
         }
     }
 }
@@ -77,6 +90,8 @@ impl TryFrom<u8> for ExtensionIds {
             1 => Ok(Self::Chunked),
             #[cfg(feature = "manage")]
             2 => Ok(Self::Manage),
+            #[cfg(feature = "hmacsha256p256")]
+            3 => Ok(Self::HmacShaP256),
             _ => Err(Error::FunctionNotSupported),
         }
     }
@@ -122,7 +137,16 @@ impl ExtensionDispatch for Dispatcher {
                     resources,
                 )
             }
-
+            #[cfg(feature = "hmacsha256p256")]
+            ExtensionIds::HmacShaP256 => {
+                ExtensionImpl::<HmacSha256P256Extension>::extension_request_serialized(
+                    &mut self.backend,
+                    &mut ctx.core,
+                    &mut ctx.backends,
+                    request,
+                    resources,
+                )
+            }
             #[cfg(feature = "chunked")]
             ExtensionIds::Chunked => {
                 ExtensionImpl::<ChunkedExtension>::extension_request_serialized(
@@ -133,7 +157,6 @@ impl ExtensionDispatch for Dispatcher {
                     resources,
                 )
             }
-
             #[cfg(feature = "manage")]
             ExtensionIds::Manage => ExtensionImpl::<ManageExtension>::extension_request_serialized(
                 &mut self.backend,
