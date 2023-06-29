@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0 or MIT
 
 use serde::{Deserialize, Serialize};
+use trussed::types::SerializedKey;
 use trussed::{
     client::ClientError,
     key::{self, Kind},
     serde_extensions::{Extension, ExtensionClient, ExtensionImpl, ExtensionResult},
-    service::{ Keystore, ServiceResources},
-    types::{Bytes, CoreContext,  KeyId, Location, Mechanism},
+    service::{Keystore, ServiceResources},
+    types::{Bytes, CoreContext, KeyId, Location, Mechanism},
     Error,
 };
-use trussed::types::SerializedKey;
-
 
 #[derive(Debug, Default)]
 pub struct HmacSha256P256Extension;
@@ -164,22 +163,22 @@ pub fn derive_key_from_hash(
     let key_id = keystore.store_key(
         request.location,
         key::Secrecy::Secret,
-        key::Kind::P256,
+        key::Kind::P256, // TODO use mechanism/kind from the request
         &derived_key,
     )?;
-    Ok(reply::DeriveFromHash {key: Some(key_id)})
+    Ok(reply::DeriveFromHash { key: Some(key_id) })
 }
 
 pub fn inject_any_key(
     keystore: &mut impl Keystore,
     request: &request::InjectAnyKey,
 ) -> Result<reply::InjectAnyKey, Error> {
-        let key_id = keystore.store_key(
-            request.location,
-            key::Secrecy::Secret,
-            request.kind,
-            &request.raw_key,
-        )?;
+    let key_id = keystore.store_key(
+        request.location,
+        key::Secrecy::Secret,
+        request.kind,
+        &request.raw_key,
+    )?;
 
     Ok(reply::InjectAnyKey { key: Some(key_id) })
 }
@@ -214,8 +213,7 @@ pub trait HmacSha256P256Client: ExtensionClient<HmacSha256P256Extension> {
         location: Location,
         data: &[u8],
     ) -> HmacSha256P256Result<'_, reply::DeriveFromHash, Self> {
-        let data =
-            Bytes::from_slice(data).map_err(|_| ClientError::DataTooLarge)?;
+        let data = Bytes::from_slice(data).map_err(|_| ClientError::DataTooLarge)?;
         self.extension(request::DeriveFromHash {
             mechanism,
             key,
