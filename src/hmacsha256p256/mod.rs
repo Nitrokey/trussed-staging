@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 or MIT
 
 use serde::{Deserialize, Serialize};
-use trussed::types::{Message};
+use trussed::types::Message;
 use trussed::{
     client::ClientError,
     key::{self, Kind},
@@ -192,7 +192,7 @@ impl ExtensionImpl<HmacSha256P256Extension> for super::StagingBackend {
         request: &HmacSha256P256Request,
         resources: &mut ServiceResources<P>,
     ) -> Result<HmacSha256P256Reply, Error> {
-        let keystore = &mut resources.keystore(core_ctx)?;
+        let keystore = &mut resources.keystore(core_ctx.path.clone())?;
         match request {
             HmacSha256P256Request::DeriveFromHash(request) => {
                 derive_key_from_hash(keystore, request).map(Into::into)
