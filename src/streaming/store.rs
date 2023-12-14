@@ -146,13 +146,13 @@ pub fn move_file(
 
     match from_location {
         Location::Internal => {
-            move_file_step1(store, &**store.ifs(), from_path, to_location, to_path)
+            move_file_step1(store, store.ifs(), from_path, to_location, to_path)
         }
         Location::External => {
-            move_file_step1(store, &**store.efs(), from_path, to_location, to_path)
+            move_file_step1(store, store.efs(), from_path, to_location, to_path)
         }
         Location::Volatile => {
-            move_file_step1(store, &**store.vfs(), from_path, to_location, to_path)
+            move_file_step1(store, store.vfs(), from_path, to_location, to_path)
         }
     }
 }
@@ -166,9 +166,9 @@ fn move_file_step1<S: LfsStorage>(
     to_path: &Path,
 ) -> Result<(), Error> {
     match to_location {
-        Location::Internal => move_file_step2(from_fs, from_path, &**store.ifs(), to_path),
-        Location::External => move_file_step2(from_fs, from_path, &**store.efs(), to_path),
-        Location::Volatile => move_file_step2(from_fs, from_path, &**store.vfs(), to_path),
+        Location::Internal => move_file_step2(from_fs, from_path, store.ifs(), to_path),
+        Location::External => move_file_step2(from_fs, from_path, store.efs(), to_path),
+        Location::Volatile => move_file_step2(from_fs, from_path, store.vfs(), to_path),
     }
 }
 
